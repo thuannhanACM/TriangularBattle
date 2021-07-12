@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ee7c7f1e33b94601a869f2721042611, type: 3}
+  m_Name: BlueExplosion
+  m_EditorClassIdentifier: 
+  effect: {fileID: 198687305301139334, guid: a771f1d639b6be34ab98afe5e21afd63, type: 3}
+  score: 10

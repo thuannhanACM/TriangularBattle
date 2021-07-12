@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "635514665149",
+    "firebase_url": "https://hypercasualtemplateprod.firebaseio.com",
+    "project_id": "hypercasualtemplate",
+    "storage_bucket": "hypercasualtemplate.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635514665149:android:733d7dacca409573f89fd4",
+        "android_client_info": {
+          "package_name": "jp.co.dwango.HyperCasualTemplate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635514665149-f5n3h28n5hj4aql9uns7ukqe4rv682dt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsk7GZfvgxSSWHn4b6kChEk9v8wYuw-VM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635514665149-f5n3h28n5hj4aql9uns7ukqe4rv682dt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "635514665149-jd6l1ucnrkvafbp82dof6eu238vkl0gv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "jp.co.dwango.HyperCasualTemplate"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

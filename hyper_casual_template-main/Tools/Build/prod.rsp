@@ -1,0 +1,1 @@
+-define:PRODUCTION -define:NO_UIDEBUG -define:NO_PUSH -define:NO_ARM64
