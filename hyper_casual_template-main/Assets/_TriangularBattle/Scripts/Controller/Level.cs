@@ -2,42 +2,82 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Level : MonoBehaviour
+namespace TriangularBattle
 {
-    [SerializeField]
-    Point[] serializedPoints;
-
-    // Start is called before the first frame update
-    void Start()
+    public class Level : MonoBehaviour
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public void GetLevelSizes(out float maxWidth, out float maxHeight)
-    {
-        float minX = 0.0f, maxX = 0.0f, minY = 0.0f, maxY = 0.0f;
-        foreach(var p in serializedPoints)
+        [SerializeField]
+        Point[] serializedPoints;
+        [SerializeField]
+        Transform linesRoot;
+        
+        private List<Line> connectingLines = new List<Line>();
+        
+        // Start is called before the first frame update
+        void Start()
         {
-            if(p.transform.position.x<minX)
-                minX=p.transform.position.x;
 
-            if(p.transform.position.x>maxX)
-                maxX=p.transform.position.x;
-
-            if(p.transform.position.y<minY)
-                minY=p.transform.position.y;
-
-            if(p.transform.position.y>maxY)
-                maxY=p.transform.position.y;
         }
 
-        maxWidth=maxX-minX;
-        maxHeight=maxY-minY;
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        public void GetLevelSizes(out float maxWidth, out float maxHeight)
+        {
+            float minX = 0.0f, maxX = 0.0f, minY = 0.0f, maxY = 0.0f;
+            foreach(var p in serializedPoints)
+            {
+                if(p.Pos.x<minX)
+                    minX=p.Pos.x;
+
+                if(p.Pos.x>maxX)
+                    maxX=p.Pos.x;
+
+                if(p.Pos.y<minY)
+                    minY=p.Pos.y;
+
+                if(p.Pos.y>maxY)
+                    maxY=p.Pos.y;
+            }
+
+            maxWidth=maxX-minX;
+            maxHeight=maxY-minY;
+        }
+
+        public bool IsLineAvailable(Point pA, Point pB)
+        {
+            bool isvalidLine = true;
+            foreach(var line in connectingLines)
+            {
+                if((line.points[0]==pA&&line.points[1]==pB)||(line.points[0]==pB&&line.points[1]==pA))
+                {
+                    isvalidLine=false;
+                    break;
+                }
+
+                if(Line.AreLinesIntersect(pA, pB, line))
+                {
+                    isvalidLine=false;
+                    break;
+                }
+            }
+            return isvalidLine;
+        }
+
+        public void AddLine(Point pA, Point pB)
+        {
+            Line lineTemplate = Resources.Load<Line>("Generals/Line");
+            bool isvalidLine = true;
+            
+            if(IsLineAvailable(pA, pB))
+            {
+                Line line = Instantiate(lineTemplate, linesRoot);
+                connectingLines.Add(line);
+                line.SetPoints(pA, pB);
+            }
+        }
     }
 }

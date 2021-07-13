@@ -6,23 +6,62 @@ using UnityEditor;
 using UnityEngine;
 
 
-public class Line : MonoBehaviour
+namespace TriangularBattle
 {
-    [SerializeField]
-    LineRenderer lineRenderer;
-    [SerializeField]
-    GameObject[] points;
-
-    // Start is called before the first frame update
-    void Start()
+    public class Line : MonoBehaviour
     {
-        UpdateLine();
-    }
+        [SerializeField]
+        LineRenderer lineRenderer;
+        
+        public List<Point> points = new List<Point>();
 
-    // Update is called once per frame
-    public void UpdateLine()
-    {
-        lineRenderer.SetPosition(0, points[0].transform.position);
-        lineRenderer.SetPosition(1, points[1].transform.position);
+        // Start is called before the first frame update
+        void Start()
+        {
+            UpdateLine();
+        }
+
+        public void SetPoints(Point pA, Point pB)
+        {
+            points.Add(pA);
+            points.Add(pB);
+            UpdateLine();
+        }
+
+        // Update is called once per frame
+        public void UpdateLine()
+        {
+            lineRenderer.SetPosition(0, points[0].Pos);
+            lineRenderer.SetPosition(1, points[1].Pos);
+        }
+
+        public static bool AreLinesIntersect(Point p1, Point p2, Line line)
+        {
+            return isLinesIntersect(p1, p2, line.points[0], line.points[1]);
+        }
+
+        public static bool AreLinesIntersect(Line line1, Line line2)
+        {
+            return isLinesIntersect(line1.points[0], line1.points[1], line2.points[0], line2.points[1]);
+        }
+
+        private static bool checkPoints(Point pA, Point pB)
+        {
+            return (pA.Pos.x==pB.Pos.x&&pA.Pos.y==pB.Pos.y);
+        }
+
+        private static bool isLinesIntersect(Point pA1, Point pA2, Point pB1, Point pB2)
+        {
+            if(checkPoints(pA1, pB1)||
+                checkPoints(pA1, pB2)||
+                checkPoints(pA2, pB1)||
+                checkPoints(pA2, pB2))
+                return false;
+
+            return ((Mathf.Max(pA1.Pos.x, pA2.Pos.x)>Mathf.Min(pB1.Pos.x, pB2.Pos.x))&&
+                    (Mathf.Max(pB1.Pos.x, pB2.Pos.x)>Mathf.Min(pA1.Pos.x, pA2.Pos.x))&&
+                    (Mathf.Max(pA1.Pos.y, pA2.Pos.y)>Mathf.Min(pB1.Pos.y, pB2.Pos.y))&&
+                    (Mathf.Max(pB1.Pos.y, pB2.Pos.y)>Mathf.Min(pA1.Pos.y, pA2.Pos.y)));
+        }
     }
 }

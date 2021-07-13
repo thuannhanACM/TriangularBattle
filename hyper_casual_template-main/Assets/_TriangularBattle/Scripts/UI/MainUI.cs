@@ -28,6 +28,7 @@ namespace TriangularBattle
         public void OnStartBtnClicked()
         {
             StartButton.SetActive(false);
+            GameManager.instance.SwitchState(GameManager.GameState.start);
         }
 
         public void OnSettingBtnClicked()

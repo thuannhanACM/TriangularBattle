@@ -1,24 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
-#if UNITY_EDITOR
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
 #endif
 
-#if UNITY_EDITOR
-[CustomEditor(typeof(Line))]
-public class LineEditor : Editor
+namespace TriangularBattle
 {
-    public override void OnInspectorGUI()
+#if UNITY_EDITOR
+    [CustomEditor(typeof(Line))]
+    public class LineEditor : Editor
     {
-        DrawDefaultInspector();
-        GUILayout.BeginVertical();
-        GUILayout.Space(20);
-        if(GUILayout.Button("UpdateLine"))
+        public override void OnInspectorGUI()
         {
-            ((Line)target).UpdateLine();
+            DrawDefaultInspector();
+            GUILayout.BeginVertical();
+            GUILayout.Space(20);
+            if(GUILayout.Button("UpdateLine"))
+            {
+                ((Line)target).UpdateLine();
+            }
+            GUILayout.EndVertical();
         }
-        GUILayout.EndVertical();
     }
-}
 #endif
+}

@@ -2,19 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Point : MonoBehaviour
+namespace TriangularBattle
 {
-    [SerializeField]
-    Point[] connectablePoints;
-    // Start is called before the first frame update
-    void Start()
+    public class Point : MonoBehaviour
     {
-        
-    }
+        [SerializeField]
+        Point[] connectablePoints;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
+        public Vector3 Pos
+        {
+            get { return transform.position; }
+        }
+        // Start is called before the first frame update
+        void Start()
+        {
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        public void ShowFeedback()
+        {
+            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+            renderer.material.color=Color.red;
+        }
+    }}
