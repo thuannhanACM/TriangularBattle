@@ -7,6 +7,7 @@ namespace TriangularBattle
 {
     public class GameManager : MonoBehaviour
     {
+        public static GameManager instance;
         public enum GameState
         {
             main_menu,
@@ -15,8 +16,7 @@ namespace TriangularBattle
             player_input,
         }
 
-        public static GameManager instance;
-
+        public GameObject character;
         public Text LevelText;
         public GameObject levelRoot;
         public LineRenderer SelectingLineRenderer;
@@ -53,15 +53,16 @@ namespace TriangularBattle
         void ScalingLevel()
         {
             //first calculating the point in viewport
-            Vector3 v3ViewPort = new Vector3(0.1f, 0.1f, 10);
+            Vector3 v3ViewPort = new Vector3(0.05f, 0.05f, 10);
             Vector3 v3BottomLeft = Camera.main.ViewportToWorldPoint(v3ViewPort);
-            v3ViewPort.Set(0.9f, 0.9f, 10);
+            v3ViewPort.Set(0.95f, 0.95f, 10);
             Vector3 v3TopRight = Camera.main.ViewportToWorldPoint(v3ViewPort);
 
             currentLevel.GetLevelSizes(out float levelWidth, out float levelHeight);
             float scaleX = (v3TopRight.x-v3BottomLeft.x)/levelWidth;
             float scaleY = (v3TopRight.y-v3BottomLeft.y)/levelHeight;
             float minScale = Mathf.Min(scaleX, scaleY);
+            currentLevel.transform.position+=Vector3.forward*(v3TopRight.z-v3BottomLeft.z)/2;
             currentLevel.transform.localScale=new Vector3(minScale, minScale, minScale);
         }
 
@@ -80,16 +81,20 @@ namespace TriangularBattle
                         if(Input.GetMouseButtonDown(0))
                         {
                             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-                            if(hit.collider!=null&&hit.collider.gameObject.GetComponent<Point>()!=null)
+                            RaycastHit hit;
+                            if(Physics.Raycast(ray, out hit))
                             {
-                                Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
-                                selectingPoint=hitPoint;
-                                selectingPoint.ShowFeedback();
+                                if(hit.collider.gameObject.GetComponent<Point>()!=null)
+                                {
+                                    Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
+                                    selectingPoint=hitPoint;
 
-                                SelectingLineRenderer.SetPosition(0, hitPoint.transform.position);
-                                SelectingLineRenderer.SetPosition(1, hitPoint.transform.position);
-                                SelectingLineRenderer.gameObject.SetActive(true);
+                                    SelectingLineRenderer.SetPosition(0, hitPoint.transform.position);
+                                    SelectingLineRenderer.SetPosition(1, hitPoint.transform.position);
+                                    SelectingLineRenderer.gameObject.SetActive(true);
+                                    SelectingLineRenderer.alignment=LineAlignment.TransformZ;
+                                }
+                                
                             }
                         }
                     }
@@ -97,23 +102,26 @@ namespace TriangularBattle
                     {
                         if(Input.GetMouseButton(0))
                         {
+                            RaycastHit hit;
                             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-                            if(hit.collider!=null)
+                            if(Physics.Raycast(ray, out hit))
                             {
-                                DrawSelection(new Vector3(hit.point.x, hit.point.y, 5.0f));
+                                DrawSelection(hit.point);
                             }
                         }
                         else if(Input.GetMouseButtonUp(0))
                         {
                             SelectingLineRenderer.gameObject.SetActive(false);
+                            RaycastHit hit;
                             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-                            if(hit.collider!=null&&hit.collider.gameObject.GetComponent<Point>()!=null)
+                            if(Physics.Raycast(ray, out hit))
                             {
-                                currentLevel.AddLine(selectingPoint, hit.collider.gameObject.GetComponent<Point>());
+                                Point p = hit.collider.gameObject.GetComponent<Point>();
+                                if(p!=null &&selectingPoint.connectablePoints.Contains(p))
+                                {
+                                    currentLevel.AddLine(selectingPoint, p);
+                                }
                             }
-
                             selectingPoint=null;
                         }
                     }
@@ -163,15 +171,6 @@ namespace TriangularBattle
         {
             playerTurnAnimObject.SetActive(false);
             SwitchState(GameState.player_input);
-        }
-
-        public void RaiseOnMouseDown(Point point)
-        {
-            if(selectingPoint==null)
-            {
-                selectingPoint=point;
-                selectingPoint.ShowFeedback();
-            }
         }
 
         private void DrawSelection(Vector3 touchPos)

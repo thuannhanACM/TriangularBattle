@@ -7,7 +7,7 @@ namespace TriangularBattle
     public class Point : MonoBehaviour
     {
         [SerializeField]
-        Point[] connectablePoints;
+        public List<Point> connectablePoints;
 
         public Vector3 Pos
         {
@@ -25,9 +25,9 @@ namespace TriangularBattle
 
         }
 
-        public void ShowFeedback()
-        {
-            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-            renderer.material.color=Color.red;
-        }
+        //public void ShowFeedback()
+        //{
+        //    SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+        //    renderer.material.color=Color.red;
+        //}
     }}

@@ -33,6 +33,8 @@ namespace TriangularBattle
         {
             lineRenderer.SetPosition(0, points[0].Pos);
             lineRenderer.SetPosition(1, points[1].Pos);
+
+            lineRenderer.alignment=LineAlignment.TransformZ;
         }
 
         public static bool AreLinesIntersect(Point p1, Point p2, Line line)
@@ -47,7 +49,7 @@ namespace TriangularBattle
 
         private static bool checkPoints(Point pA, Point pB)
         {
-            return (pA.Pos.x==pB.Pos.x&&pA.Pos.y==pB.Pos.y);
+            return (pA.Pos.x==pB.Pos.x&&pA.Pos.z==pB.Pos.z);
         }
 
         private static bool isLinesIntersect(Point pA1, Point pA2, Point pB1, Point pB2)
@@ -60,8 +62,8 @@ namespace TriangularBattle
 
             return ((Mathf.Max(pA1.Pos.x, pA2.Pos.x)>Mathf.Min(pB1.Pos.x, pB2.Pos.x))&&
                     (Mathf.Max(pB1.Pos.x, pB2.Pos.x)>Mathf.Min(pA1.Pos.x, pA2.Pos.x))&&
-                    (Mathf.Max(pA1.Pos.y, pA2.Pos.y)>Mathf.Min(pB1.Pos.y, pB2.Pos.y))&&
-                    (Mathf.Max(pB1.Pos.y, pB2.Pos.y)>Mathf.Min(pA1.Pos.y, pA2.Pos.y)));
+                    (Mathf.Max(pA1.Pos.z, pA2.Pos.z)>Mathf.Min(pB1.Pos.z, pB2.Pos.z))&&
+                    (Mathf.Max(pB1.Pos.z, pB2.Pos.z)>Mathf.Min(pA1.Pos.z, pA2.Pos.z)));
         }
     }
 }

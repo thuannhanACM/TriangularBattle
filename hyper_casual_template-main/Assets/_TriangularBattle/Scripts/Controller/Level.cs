@@ -27,7 +27,7 @@ namespace TriangularBattle
 
         public void GetLevelSizes(out float maxWidth, out float maxHeight)
         {
-            float minX = 0.0f, maxX = 0.0f, minY = 0.0f, maxY = 0.0f;
+            float minX = 0.0f, maxX = 0.0f, minZ = 0.0f, maxZ = 0.0f;
             foreach(var p in serializedPoints)
             {
                 if(p.Pos.x<minX)
@@ -36,15 +36,15 @@ namespace TriangularBattle
                 if(p.Pos.x>maxX)
                     maxX=p.Pos.x;
 
-                if(p.Pos.y<minY)
-                    minY=p.Pos.y;
+                if(p.Pos.z<minZ)
+                    minZ=p.Pos.z;
 
-                if(p.Pos.y>maxY)
-                    maxY=p.Pos.y;
+                if(p.Pos.z>maxZ)
+                    maxZ=p.Pos.z;
             }
 
             maxWidth=maxX-minX;
-            maxHeight=maxY-minY;
+            maxHeight=maxZ-minZ;
         }
 
         public bool IsLineAvailable(Point pA, Point pB)
