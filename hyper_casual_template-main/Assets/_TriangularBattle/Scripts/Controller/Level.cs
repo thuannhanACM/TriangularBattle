@@ -77,7 +77,10 @@ namespace TriangularBattle
                 Line line = Instantiate(lineTemplate, linesRoot);
                 connectingLines.Add(line);
                 line.SetPoints(pA, pB);
+                Global.VibrationHaptic(1);
             }
+            else
+                Global.VibrationHaptic(3);
         }
     }
 }
