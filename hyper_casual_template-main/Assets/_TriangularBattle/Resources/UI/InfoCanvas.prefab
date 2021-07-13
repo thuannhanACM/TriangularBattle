@@ -1211,6 +1211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SettingPanel: {fileID: 3976723091193114107}
+  StartButton: {fileID: 3976723090021437011}
   SoundToggle: {fileID: 3976723089878203995}
   VibrateToggle: {fileID: 3976723090956833601}
 --- !u!1 &3976723090772542316

@@ -10,6 +10,8 @@ namespace TriangularBattle
         [SerializeField]
         GameObject SettingPanel;
         [SerializeField]
+        GameObject StartButton;
+        [SerializeField]
         Toggle SoundToggle;
         [SerializeField]
         Toggle VibrateToggle;
@@ -25,6 +27,7 @@ namespace TriangularBattle
 
         public void OnStartBtnClicked()
         {
+            StartButton.SetActive(false);
         }
 
         public void OnSettingBtnClicked()
