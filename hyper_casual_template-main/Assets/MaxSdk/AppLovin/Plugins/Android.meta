@@ -3,6 +3,7 @@ guid: 5cd30b07ad8f64ac5a67692e04be43b0
 labels:
 - al_max
 - al_max_export_path-MaxSdk/AppLovin/Plugins/Android
+- al_max_export_path-MaxSdk\AppLovin\Plugins\Android
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

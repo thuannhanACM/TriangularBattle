@@ -3,6 +3,7 @@ guid: c82a9fdb4d27f4192a85652e6b642c4d
 labels:
 - al_max
 - al_max_export_path-MaxSdk/AppLovin/Editor
+- al_max_export_path-MaxSdk\AppLovin\Editor
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

@@ -3,6 +3,7 @@ guid: db5e176ebd50043998645cc4a9cb20b4
 labels:
 - al_max
 - al_max_export_path-MaxSdk/Scripts/IntegrationManager
+- al_max_export_path-MaxSdk\Scripts\IntegrationManager
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
