@@ -15,6 +15,16 @@ namespace TriangularBattle
         Toggle SoundToggle;
         [SerializeField]
         Toggle VibrateToggle;
+        [SerializeField]
+        GameObject startLevelObject;
+        [SerializeField] 
+        GameObject playerTurnAnimObject;
+        [SerializeField] 
+        GameObject enemyTurnAnimObject;
+        [SerializeField]
+        GameObject winnerUIObject;
+        [SerializeField]
+        GameObject LoseUIObject;
 
         private void Start()
         {
@@ -66,6 +76,68 @@ namespace TriangularBattle
         public void OnAppTermsBtnClicked()
         {
             Application.OpenURL("https://site.nicovideo.jp/app/terms/");
+        }
+
+        public void OnRestart()
+        {
+            Global.LoadScene(null);
+        }
+
+        public void NextLevel()
+        {
+            if(Global.curLevel>=CsvUtil.getLevelCount())
+                Global.curLevel=1;
+            else
+                Global.curLevel++;
+            if(Global.curLevel!=Data.CurrentLevel)
+                Data.CurrentLevel=Global.curLevel;
+            Global.LoadScene(null);
+        }
+
+        public void ShowStartAnimation()
+        {
+            startLevelObject.SetActive(true);
+            Invoke("FinishStartAnimation", 2f);
+        }
+
+        private void FinishStartAnimation()
+        {
+            startLevelObject.SetActive(false);
+            GameManager.instance.SwitchState(GameManager.GameState.show_player_turn);
+        }
+
+        public void ShowPlayerTurnAnimation()
+        {
+            playerTurnAnimObject.SetActive(true);
+            Invoke("FinishPlayerTurnAnimation", 2f);
+        }
+
+        public void FinishPlayerTurnAnimation()
+        {
+            playerTurnAnimObject.SetActive(false);
+            GameManager.instance.SwitchState(GameManager.GameState.player_input);
+        }
+
+        public void ShowEnemyTurnAnimation()
+        {
+            enemyTurnAnimObject.SetActive(true);
+            Invoke("FinishEnemyTurnAnimation", 2f);
+        }
+
+        private void FinishEnemyTurnAnimation()
+        {
+            enemyTurnAnimObject.SetActive(false);
+            GameManager.instance.SwitchState(GameManager.GameState.enemy_input);
+        }
+
+        public void ShowWinnerUI()
+        {
+            winnerUIObject.SetActive(true);
+        }
+
+        public void ShowLoseUI()
+        {
+            LoseUIObject.SetActive(true);
         }
     }
 }

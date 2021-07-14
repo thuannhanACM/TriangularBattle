@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace TriangularBattle
 {
@@ -14,16 +15,27 @@ namespace TriangularBattle
             start,
             show_player_turn,
             player_input,
+            check_win_lose,
+            show_enemy_turn,
+            enemy_input
         }
 
-        public GameObject character;
+        public static int PLAYER_SIDE = 0;
+        public static int ENEMY_SIDE = 1;
+        public MainUI mainUI;
+        public AnimatingCharacter[] soldierPrefab;
+        public Triangle[] trianglesPrefab;
+        public LineRenderer[] SelectingLineRenderers;
+
+        public Transform fxRoot;
+        public GameObject winFX;
         public Text LevelText;
         public GameObject levelRoot;
-        public LineRenderer SelectingLineRenderer;
-        public GameObject startLevelObject;
-        public GameObject playerTurnAnimObject;
+        public GameObject KickOutExplosion;
+        public Image playerScoreImage;
 
         public GameState currentGameState;
+        public GameState lastGameState;
         private Level currentLevel = null;
 
         Point selectingPoint = null;
@@ -36,6 +48,11 @@ namespace TriangularBattle
         // Start is called before the first frame update
         void Start()
         {
+            UpdateScore(0, 0);
+            SelectingLineRenderers[0].alignment=LineAlignment.TransformZ;
+            SelectingLineRenderers[1].alignment=LineAlignment.TransformZ;
+            currentGameState=lastGameState=GameState.main_menu;
+
             Global.isSoundOn=Data.isSoundOn;
             Global.isVibrationOn=Data.isVibrationOn;
             Global.curLevel=Data.CurrentLevel;
@@ -53,9 +70,9 @@ namespace TriangularBattle
         void ScalingLevel()
         {
             //first calculating the point in viewport
-            Vector3 v3ViewPort = new Vector3(0.05f, 0.05f, 10);
+            Vector3 v3ViewPort = new Vector3(0.0f, 0.0f, 10);
             Vector3 v3BottomLeft = Camera.main.ViewportToWorldPoint(v3ViewPort);
-            v3ViewPort.Set(0.95f, 0.95f, 10);
+            v3ViewPort.Set(1.0f, 1.0f, 10);
             Vector3 v3TopRight = Camera.main.ViewportToWorldPoint(v3ViewPort);
 
             currentLevel.GetLevelSizes(out float levelWidth, out float levelHeight);
@@ -76,56 +93,10 @@ namespace TriangularBattle
                 case GameState.start:
                     break;
                 case GameState.player_input:
-                    if(selectingPoint==null)
-                    {
-                        if(Input.GetMouseButtonDown(0))
-                        {
-                            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            RaycastHit hit;
-                            if(Physics.Raycast(ray, out hit))
-                            {
-                                if(hit.collider.gameObject.GetComponent<Point>()!=null)
-                                {
-                                    Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
-                                    selectingPoint=hitPoint;
-
-                                    SelectingLineRenderer.SetPosition(0, hitPoint.transform.position);
-                                    SelectingLineRenderer.SetPosition(1, hitPoint.transform.position);
-                                    SelectingLineRenderer.gameObject.SetActive(true);
-                                    SelectingLineRenderer.alignment=LineAlignment.TransformZ;
-                                }
-                                
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(Input.GetMouseButton(0))
-                        {
-                            RaycastHit hit;
-                            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            if(Physics.Raycast(ray, out hit))
-                            {
-                                DrawSelection(hit.point);
-                            }
-                        }
-                        else if(Input.GetMouseButtonUp(0))
-                        {
-                            SelectingLineRenderer.gameObject.SetActive(false);
-                            RaycastHit hit;
-                            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                            if(Physics.Raycast(ray, out hit))
-                            {
-                                Point p = hit.collider.gameObject.GetComponent<Point>();
-                                if(p!=null &&selectingPoint.connectablePoints.Contains(p))
-                                {
-                                    currentLevel.AddLine(selectingPoint, p);
-                                }
-                            }
-                            selectingPoint=null;
-                        }
-                    }
-                    
+                    UpdateMouseInput(PLAYER_SIDE);
+                    break;
+                case GameState.enemy_input:
+                    UpdateMouseInput(ENEMY_SIDE);
                     break;
             }
         }
@@ -133,49 +104,144 @@ namespace TriangularBattle
         public void SwitchState(GameState newState)
         {
             if(currentGameState!=newState)
-                currentGameState=newState;
-
-            switch(currentGameState)
             {
-                case GameState.main_menu:
-                    break;
-
-                case GameState.start:
-                    ShowStartAnimation();
-                    break;
-                case GameState.show_player_turn:
-                    ShowPlayerTurnAnimation();
-                    break;
+                lastGameState = currentGameState;
+                currentGameState=newState;
+                switch(currentGameState)
+                {
+                    case GameState.main_menu:
+                        break;
+                    case GameState.start:
+                        mainUI.ShowStartAnimation();
+                        break;
+                    case GameState.show_player_turn:
+                        mainUI.ShowPlayerTurnAnimation();
+                        break;
+                    case GameState.check_win_lose:
+                        StartCoroutine(CheckAndSwitchTurn());
+                        break;
+                    case GameState.show_enemy_turn:
+                        mainUI.ShowEnemyTurnAnimation();
+                        break;
+                }
             }
         }
 
-        private void ShowStartAnimation()
+        private void UpdateSelection(int side, Vector3 touchPos)
         {
-            startLevelObject.SetActive(true);
-            Invoke("FinishStartAnimation", 2f);
+            SelectingLineRenderers[side].SetPosition(1, touchPos);
         }
 
-        private void FinishStartAnimation()
+        private void UpdateMouseInput(int side)
         {
-            startLevelObject.SetActive(false);
-            SwitchState(GameState.show_player_turn);
+            if(selectingPoint==null)
+            {
+                if(Input.GetMouseButtonDown(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if(Physics.Raycast(ray, out hit))
+                    {
+                        if(hit.collider.gameObject.GetComponent<Point>()!=null)
+                        {
+                            Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
+                            selectingPoint=hitPoint;
+
+                            SelectingLineRenderers[side].SetPosition(0, hitPoint.transform.position);
+                            SelectingLineRenderers[side].SetPosition(1, hitPoint.transform.position);
+                            SelectingLineRenderers[side].gameObject.SetActive(true);
+                            
+                        }
+
+                    }
+                }
+            }
+            else
+            {
+                if(Input.GetMouseButton(0))
+                {
+                    RaycastHit hit;
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if(Physics.Raycast(ray, out hit))
+                    {
+                        UpdateSelection(side, hit.point);
+                    }
+                }
+                else if(Input.GetMouseButtonUp(0))
+                {
+                    SelectingLineRenderers[side].gameObject.SetActive(false);
+                    RaycastHit hit;
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    if(Physics.Raycast(ray, out hit))
+                    {
+                        Point p = hit.collider.gameObject.GetComponent<Point>();
+                        if(p!=null&&selectingPoint.connectablePoints.Contains(p))
+                        {
+                            var line = currentLevel.AddLine(side, selectingPoint, p);
+                            if(line!=null)
+                            {
+                                currentLevel.CreateTriangles(side, line.StartPoint);
+                                currentLevel.CreateTriangles(side, line.EndPoint);
+                                UpdateScore(currentLevel.GetScore(PLAYER_SIDE), currentLevel.GetScore(ENEMY_SIDE));
+                                SwitchState(GameState.check_win_lose);
+                            }
+                        }
+                    }
+                    selectingPoint=null;
+                }
+            }
         }
 
-        private void ShowPlayerTurnAnimation()
+        public bool IsGameEnd()
         {
-            playerTurnAnimObject.SetActive(true);
-            Invoke("FinishPlayerTurnAnimation", 2f);
+            return currentLevel.IsGameEnd();
         }
 
-        private void FinishPlayerTurnAnimation()
+        private IEnumerator CheckAndSwitchTurn()
         {
-            playerTurnAnimObject.SetActive(false);
-            SwitchState(GameState.player_input);
+            //checking win/lose
+            if(IsGameEnd())
+            {
+                int playerScore = currentLevel.GetScore(PLAYER_SIDE);
+                int enemyScore = currentLevel.GetScore(ENEMY_SIDE);
+                if(playerScore>enemyScore)
+                    StartCoroutine(ShowWinUI());
+                else
+                    StartCoroutine(ShowLoseUI());
+            }
+            else//if not switch for next turn
+            {
+                yield return new WaitForSeconds(0.5f);
+                if(lastGameState==GameState.player_input)
+                    SwitchState(GameState.show_enemy_turn);
+                else if(lastGameState==GameState.enemy_input)
+                    SwitchState(GameState.show_player_turn);
+            }
         }
 
-        private void DrawSelection(Vector3 touchPos)
+        public void UpdateScore(int playerScore, int enemyScore)
         {
-            SelectingLineRenderer.SetPosition(1, touchPos);
+            if(playerScore+enemyScore==0)
+            {
+                playerScoreImage.fillAmount=0.5f;
+            }
+            else 
+            {
+                playerScoreImage.DOFillAmount((float)playerScore/(playerScore+enemyScore), 0.5f);
+            }
+        }
+
+        private IEnumerator ShowWinUI()
+        {
+            yield return new WaitForSeconds(0.25f);
+            mainUI.ShowWinnerUI();
+            GameObject fx = Instantiate<GameObject>(winFX, fxRoot);
+        }
+
+        private IEnumerator ShowLoseUI()
+        {
+            yield return new WaitForSeconds(0.25f);
+            mainUI.ShowLoseUI();
         }
     }
 }
