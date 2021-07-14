@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿//#define USE_NO_ENEMY_AI
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,11 +34,13 @@ namespace TriangularBattle
         public GameObject levelRoot;
         public GameObject KickOutExplosion;
         public Image playerScoreImage;
-
+        public Transform enemyFakeDraggingPos;
         public GameState currentGameState;
         public GameState lastGameState;
+
         private Level currentLevel = null;
 
+        Point lastSelectedPoint = null;
         Point selectingPoint = null;
 
         private void Awake()
@@ -96,7 +99,14 @@ namespace TriangularBattle
                     UpdateMouseInput(PLAYER_SIDE);
                     break;
                 case GameState.enemy_input:
+#if USE_NO_ENEMY_AI
                     UpdateMouseInput(ENEMY_SIDE);
+#else
+                    if(selectingPoint!=null)
+                    {
+                        SelectingLineRenderers[ENEMY_SIDE].SetPosition(1, enemyFakeDraggingPos.position);
+                    }
+#endif
                     break;
             }
         }
@@ -105,7 +115,7 @@ namespace TriangularBattle
         {
             if(currentGameState!=newState)
             {
-                lastGameState = currentGameState;
+                lastGameState=currentGameState;
                 currentGameState=newState;
                 switch(currentGameState)
                 {
@@ -118,11 +128,31 @@ namespace TriangularBattle
                         mainUI.ShowPlayerTurnAnimation();
                         break;
                     case GameState.check_win_lose:
+                        selectingPoint=null;
                         StartCoroutine(CheckAndSwitchTurn());
                         break;
                     case GameState.show_enemy_turn:
                         mainUI.ShowEnemyTurnAnimation();
                         break;
+#if !USE_NO_ENEMY_AI
+                    case GameState.enemy_input:
+                        selectingPoint=FindSelectionForEnemy();
+                        if(selectingPoint==null)
+                        {
+                            //force Player win => as in document
+                            StartCoroutine(ShowWinUI());
+                        }
+                        else
+                        {
+                            SelectingLineRenderers[ENEMY_SIDE].gameObject.SetActive(true);
+                            SelectingLineRenderers[ENEMY_SIDE].SetPosition(0, lastSelectedPoint.Pos);
+                            SelectingLineRenderers[ENEMY_SIDE].SetPosition(1, lastSelectedPoint.Pos);
+                            enemyFakeDraggingPos.position=lastSelectedPoint.Pos;
+                            enemyFakeDraggingPos.DOMove(selectingPoint.Pos, 0.5f);
+                            Invoke("MakeEnemyLine", 0.5f);
+                        }
+                        break;
+#endif
                 }
             }
         }
@@ -150,9 +180,7 @@ namespace TriangularBattle
                             SelectingLineRenderers[side].SetPosition(0, hitPoint.transform.position);
                             SelectingLineRenderers[side].SetPosition(1, hitPoint.transform.position);
                             SelectingLineRenderers[side].gameObject.SetActive(true);
-                            
                         }
-
                     }
                 }
             }
@@ -184,6 +212,7 @@ namespace TriangularBattle
                                 currentLevel.CreateTriangles(side, line.EndPoint);
                                 UpdateScore(currentLevel.GetScore(PLAYER_SIDE), currentLevel.GetScore(ENEMY_SIDE));
                                 SwitchState(GameState.check_win_lose);
+                                lastSelectedPoint=p;
                             }
                         }
                     }
@@ -225,7 +254,7 @@ namespace TriangularBattle
             {
                 playerScoreImage.fillAmount=0.5f;
             }
-            else 
+            else
             {
                 playerScoreImage.DOFillAmount((float)playerScore/(playerScore+enemyScore), 0.5f);
             }
@@ -242,6 +271,31 @@ namespace TriangularBattle
         {
             yield return new WaitForSeconds(0.25f);
             mainUI.ShowLoseUI();
+        }
+
+        private Point FindSelectionForEnemy()
+        {
+            foreach(var p in lastSelectedPoint.connectablePoints)
+            {
+                if(currentLevel.IsLineAvailable(lastSelectedPoint, p))
+                    return p;
+            }
+            return null;
+        }
+
+        private void MakeEnemyLine()
+        {
+            SelectingLineRenderers[ENEMY_SIDE].gameObject.SetActive(false);
+            var line = currentLevel.AddLine(ENEMY_SIDE, selectingPoint, lastSelectedPoint);
+            if(line!=null)
+            {
+                currentLevel.CreateTriangles(ENEMY_SIDE, line.StartPoint);
+                currentLevel.CreateTriangles(ENEMY_SIDE, line.EndPoint);
+                UpdateScore(currentLevel.GetScore(PLAYER_SIDE), currentLevel.GetScore(ENEMY_SIDE));
+                SwitchState(GameState.check_win_lose);
+
+                lastSelectedPoint=null;
+            }
         }
     }
 }

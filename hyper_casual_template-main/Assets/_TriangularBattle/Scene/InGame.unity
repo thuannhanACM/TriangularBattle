@@ -151,6 +151,36 @@ Transform:
   m_Father: {fileID: 1831629310}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &602501878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 602501880}
+  m_Layer: 0
+  m_Name: fakeSelection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &602501880
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 602501878}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &702571713 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 702571713, guid: cede76568281ad64287ed3509ffeb830,
@@ -362,6 +392,7 @@ MonoBehaviour:
   KickOutExplosion: {fileID: 2760910625225277843, guid: f44ed7433721bea44bb4299accf57558,
     type: 3}
   playerScoreImage: {fileID: 702571713}
+  enemyFakeDraggingPos: {fileID: 602501880}
   currentGameState: 0
   lastGameState: 0
 --- !u!4 &939359502
@@ -742,8 +773,8 @@ Camera:
   m_GameObject: {fileID: 1831629307}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.1548149, g: 0.46226418, b: 0.3938202, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
