@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace TriangularBattle
 {
@@ -25,6 +26,10 @@ namespace TriangularBattle
         GameObject winnerUIObject;
         [SerializeField]
         GameObject LoseUIObject;
+        [SerializeField]
+        CanvasGroup HintCanvasGroup;
+        [SerializeField]
+        GameObject PointingGameObject;
 
         private void Start()
         {
@@ -138,6 +143,30 @@ namespace TriangularBattle
         public void ShowLoseUI()
         {
             LoseUIObject.SetActive(true);
+        }
+
+        public void ShowHintAtPoint(Vector3 worldStartPos, Vector3 worldEndPos)
+        {
+            Vector2 startViewPos = Camera.main.WorldToScreenPoint(worldStartPos);
+            Vector2 endViewPos=Camera.main.WorldToScreenPoint(worldEndPos);
+            PointingGameObject.transform.position=startViewPos;
+            PointingGameObject.transform.localScale=Vector3.one*1.2f;
+            HintCanvasGroup.gameObject.SetActive(true);
+            HintCanvasGroup.DOFade(1.0f, 0.25f).OnComplete(()=>{
+                PointingGameObject.transform.DOScale(1.0f, 0.5f).OnComplete(()=> {
+                    PointingGameObject.transform.DOMove(endViewPos, 1f).OnComplete(() => {
+                        HintCanvasGroup.DOFade(0, 1.0f).OnComplete(()=> {
+                            GameManager.instance.ResetIdleTime();
+                            HintCanvasGroup.gameObject.SetActive(false);
+                        });
+                    });
+                });
+            });
+
+            
+            
+
+            
         }
     }
 }

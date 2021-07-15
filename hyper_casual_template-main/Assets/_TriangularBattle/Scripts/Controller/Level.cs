@@ -14,6 +14,8 @@ namespace TriangularBattle
         [SerializeField]
         Transform triangleRoot;
 
+        public Point[] Points { get { return serializedPoints; } }
+
         private Dictionary<string, Line> connectingLines = new Dictionary<string, Line>();
         private Dictionary<string, Triangle> connectingTriangles = new Dictionary<string, Triangle>();
         Line lineTemplate = null;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using System.Linq;
 
 namespace TriangularBattle
 {
@@ -40,8 +41,10 @@ namespace TriangularBattle
 
         private Level currentLevel = null;
 
-        Point lastSelectedPoint = null;
-        Point selectingPoint = null;
+        private Point lastSelectedPoint = null;
+        private Point selectingPoint = null;
+
+        private float playerIdleTime = 0.0f;
 
         private void Awake()
         {
@@ -96,7 +99,10 @@ namespace TriangularBattle
                 case GameState.start:
                     break;
                 case GameState.player_input:
-                    UpdateMouseInput(PLAYER_SIDE);
+                    if(!UpdateMouseInput(PLAYER_SIDE))
+                        CheckedAndShowHint();
+                    else
+                        ResetIdleTime();
                     break;
                 case GameState.enemy_input:
 #if USE_NO_ENEMY_AI
@@ -127,6 +133,9 @@ namespace TriangularBattle
                     case GameState.show_player_turn:
                         mainUI.ShowPlayerTurnAnimation();
                         break;
+                    case GameState.player_input:
+                        ResetIdleTime();
+                        break;
                     case GameState.check_win_lose:
                         selectingPoint=null;
                         StartCoroutine(CheckAndSwitchTurn());
@@ -136,7 +145,7 @@ namespace TriangularBattle
                         break;
 #if !USE_NO_ENEMY_AI
                     case GameState.enemy_input:
-                        selectingPoint=FindSelectionForEnemy();
+                        selectingPoint=FindAvailablePoint(lastSelectedPoint);
                         if(selectingPoint==null)
                         {
                             //force Player win => as in document
@@ -162,7 +171,7 @@ namespace TriangularBattle
             SelectingLineRenderers[side].SetPosition(1, touchPos);
         }
 
-        private void UpdateMouseInput(int side)
+        private bool UpdateMouseInput(int side)
         {
             if(selectingPoint==null)
             {
@@ -180,6 +189,8 @@ namespace TriangularBattle
                             SelectingLineRenderers[side].SetPosition(0, hitPoint.transform.position);
                             SelectingLineRenderers[side].SetPosition(1, hitPoint.transform.position);
                             SelectingLineRenderers[side].gameObject.SetActive(true);
+
+                            return true;
                         }
                     }
                 }
@@ -194,6 +205,7 @@ namespace TriangularBattle
                     {
                         UpdateSelection(side, hit.point);
                     }
+                    return true;
                 }
                 else if(Input.GetMouseButtonUp(0))
                 {
@@ -217,8 +229,10 @@ namespace TriangularBattle
                         }
                     }
                     selectingPoint=null;
+                    return true;
                 }
             }
+            return false;
         }
 
         public bool IsGameEnd()
@@ -273,11 +287,13 @@ namespace TriangularBattle
             mainUI.ShowLoseUI();
         }
 
-        private Point FindSelectionForEnemy()
+        private Point FindAvailablePoint(Point startP)
         {
-            foreach(var p in lastSelectedPoint.connectablePoints)
+            System.Random random = new System.Random();
+            var points = startP.connectablePoints.OrderBy(x => random.Next()).ToList();
+            foreach(var p in points)
             {
-                if(currentLevel.IsLineAvailable(lastSelectedPoint, p))
+                if(currentLevel.IsLineAvailable(startP, p))
                     return p;
             }
             return null;
@@ -296,6 +312,49 @@ namespace TriangularBattle
 
                 lastSelectedPoint=null;
             }
+        }
+
+        public void CheckedAndShowHint()
+        {
+            if(selectingPoint!=null)
+                return;
+
+            if(playerIdleTime>0.0f)
+            {
+                //show Hint
+                playerIdleTime-=Time.deltaTime;
+                if(playerIdleTime<0)
+                {
+                    //find Available Point
+
+                    var shufflePoints = ShufflePoints(currentLevel.Points);
+                    foreach(var p in shufflePoints)
+                    {
+                        Point endPoint = FindAvailablePoint(p);
+                        if(endPoint!=null)
+                        {
+                            mainUI.ShowHintAtPoint(p.Pos, endPoint.Pos);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ResetIdleTime()
+        {
+            playerIdleTime=5.0f;
+        }
+
+        public Point[] ShufflePoints(List<Point> inPoints)
+        {
+            return ShufflePoints(inPoints.ToArray());
+        }
+
+        public Point[] ShufflePoints(Point[] inPoints)
+        {
+            System.Random random = new System.Random();
+            var points = inPoints.OrderBy(x => random.Next()).ToArray();
+            return points;
         }
     }
 }
