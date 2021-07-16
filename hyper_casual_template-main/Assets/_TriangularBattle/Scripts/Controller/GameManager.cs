@@ -76,16 +76,15 @@ namespace TriangularBattle
         void ScalingLevel()
         {
             //first calculating the point in viewport
-            Vector3 v3ViewPort = new Vector3(0.0f, 0.0f, 10);
+            Vector3 v3ViewPort = new Vector3(0.0f, 0.0f, 15.0f);
             Vector3 v3BottomLeft = Camera.main.ViewportToWorldPoint(v3ViewPort);
-            v3ViewPort.Set(1.0f, 1.0f, 10);
+            v3ViewPort.Set(1.0f, 1.0f, 15);
             Vector3 v3TopRight = Camera.main.ViewportToWorldPoint(v3ViewPort);
 
-            currentLevel.GetLevelSizes(out float levelWidth, out float levelHeight);
-            float scaleX = (v3TopRight.x-v3BottomLeft.x)/levelWidth;
-            float scaleY = (v3TopRight.y-v3BottomLeft.y)/levelHeight;
+            currentLevel.GetLevelAnchors(out float levelWidth, out float levelHeight);
+            float scaleX = Mathf.Abs((v3TopRight.x-v3BottomLeft.x)/levelWidth);
+            float scaleY = Mathf.Abs((v3TopRight.y-v3BottomLeft.y)/levelHeight);
             float minScale = Mathf.Min(scaleX, scaleY);
-            currentLevel.transform.position+=Vector3.forward*(v3TopRight.z-v3BottomLeft.z)/2;
             currentLevel.transform.localScale=new Vector3(minScale, minScale, minScale);
         }
 
@@ -333,7 +332,7 @@ namespace TriangularBattle
                         Point endPoint = FindAvailablePoint(p);
                         if(endPoint!=null)
                         {
-                            mainUI.ShowHintAtPoint(p.Pos, endPoint.Pos);
+                            StartCoroutine(mainUI.ShowHintAtPoint(p.Pos, endPoint.Pos));
                         }
                     }
                 }
@@ -342,7 +341,7 @@ namespace TriangularBattle
 
         public void ResetIdleTime()
         {
-            playerIdleTime=5.0f;
+            playerIdleTime=1.5f;
         }
 
         public Point[] ShufflePoints(List<Point> inPoints)

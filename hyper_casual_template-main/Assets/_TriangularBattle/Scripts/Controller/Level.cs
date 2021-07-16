@@ -13,6 +13,10 @@ namespace TriangularBattle
         Transform linesRoot;
         [SerializeField]
         Transform triangleRoot;
+        [SerializeField]
+        public Transform Anchor_BottomLeft;
+        [SerializeField]
+        public Transform Anchor_TopRight;
 
         public Point[] Points { get { return serializedPoints; } }
 
@@ -31,26 +35,10 @@ namespace TriangularBattle
 
         }
 
-        public void GetLevelSizes(out float maxWidth, out float maxHeight)
+        public void GetLevelAnchors(out float maxWidth, out float maxHeight)
         {
-            float minX = 0.0f, maxX = 0.0f, minZ = 0.0f, maxZ = 0.0f;
-            foreach(var p in serializedPoints)
-            {
-                if(p.Pos.x<minX)
-                    minX=p.Pos.x;
-
-                if(p.Pos.x>maxX)
-                    maxX=p.Pos.x;
-
-                if(p.Pos.z<minZ)
-                    minZ=p.Pos.z;
-
-                if(p.Pos.z>maxZ)
-                    maxZ=p.Pos.z;
-            }
-
-            maxWidth=maxX-minX;
-            maxHeight=maxZ-minZ;
+            maxWidth=Anchor_TopRight.position.x-Anchor_BottomLeft.position.x;
+            maxHeight=Anchor_TopRight.position.z-Anchor_BottomLeft.position.z;
         }
 
         public bool IsLineAvailable(Point pA, Point pB)

@@ -1081,6 +1081,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DebugMenu: {fileID: 1645353115}
+  DebugBtn: {fileID: 3902878108897989144}
 --- !u!1 &389614402763454987
 GameObject:
   m_ObjectHideFlags: 0

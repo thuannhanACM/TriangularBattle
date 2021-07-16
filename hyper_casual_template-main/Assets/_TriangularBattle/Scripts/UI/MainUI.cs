@@ -30,6 +30,8 @@ namespace TriangularBattle
         CanvasGroup HintCanvasGroup;
         [SerializeField]
         GameObject PointingGameObject;
+        [SerializeField]
+        GameObject PointingImgGameObject;
 
         private void Start()
         {
@@ -145,28 +147,33 @@ namespace TriangularBattle
             LoseUIObject.SetActive(true);
         }
 
-        public void ShowHintAtPoint(Vector3 worldStartPos, Vector3 worldEndPos)
+        public IEnumerator ShowHintAtPoint(Vector3 worldStartPos, Vector3 worldEndPos)
         {
             Vector2 startViewPos = Camera.main.WorldToScreenPoint(worldStartPos);
             Vector2 endViewPos=Camera.main.WorldToScreenPoint(worldEndPos);
+
             PointingGameObject.transform.position=startViewPos;
-            PointingGameObject.transform.localScale=Vector3.one*1.2f;
+            PointingImgGameObject.transform.localScale=Vector3.one*1.2f;
             HintCanvasGroup.gameObject.SetActive(true);
-            HintCanvasGroup.DOFade(1.0f, 0.25f).OnComplete(()=>{
-                PointingGameObject.transform.DOScale(1.0f, 0.5f).OnComplete(()=> {
-                    PointingGameObject.transform.DOMove(endViewPos, 1f).OnComplete(() => {
-                        HintCanvasGroup.DOFade(0, 1.0f).OnComplete(()=> {
-                            GameManager.instance.ResetIdleTime();
-                            HintCanvasGroup.gameObject.SetActive(false);
-                        });
-                    });
-                });
-            });
 
-            
-            
+            HintCanvasGroup.DOFade(1.0f, 0.25f);
+            yield return new WaitForSeconds(0.25f);
+            DOTween.Clear();
 
-            
+            PointingImgGameObject.transform.DOScale(1.0f, 0.5f);
+            yield return new WaitForSeconds(0.55f);
+            DOTween.Clear();
+
+            PointingGameObject.transform.DOMove(endViewPos, 1f);
+            yield return new WaitForSeconds(1.5f);
+            DOTween.Clear();
+
+            HintCanvasGroup.DOFade(0, 0.5f);
+            yield return new WaitForSeconds(0.5f);
+            DOTween.Clear();
+
+            GameManager.instance.ResetIdleTime();
+            HintCanvasGroup.gameObject.SetActive(false);
         }
     }
 }
