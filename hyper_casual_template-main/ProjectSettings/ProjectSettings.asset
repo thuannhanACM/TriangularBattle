@@ -172,7 +172,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: cloud.VolcanoGames.TriangularBattle
-    iPhone: cloud.VolcanoGames.HyperCasualTemplate
+    iPhone: cloud.VolcanoGames.TriangularBattle
   buildNumber:
     iPhone: 1
   AndroidBundleVersionCode: 1
