@@ -10,6 +10,8 @@ namespace TriangularBattle
         public int index = 0;
         [SerializeField]
         public List<Point> connectablePoints;
+        [SerializeField]
+        private GameObject hilight;
 
         public Dictionary<string, Line> relativeLines = new Dictionary<string, Line>();
         public Dictionary<string, Triangle> relativeTriangles = new Dictionary<string, Triangle>();
@@ -51,6 +53,11 @@ namespace TriangularBattle
                     result.Add(line.Value);
             }
             return result;
+        }
+
+        public void ToggleHilight(bool isHilight)
+        {
+            hilight.SetActive(isHilight);
         }
 
         public static bool operator == (Point p1, Point p2)

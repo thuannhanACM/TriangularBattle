@@ -3026,6 +3026,7 @@ GameObject:
   - component: {fileID: 3976723090585242555}
   - component: {fileID: 3976723090585242554}
   - component: {fileID: 3976723090585242550}
+  - component: {fileID: 5599015246712542168}
   m_Layer: 5
   m_Name: InfoCanvas
   m_TagString: Untagged
@@ -3141,6 +3142,18 @@ MonoBehaviour:
   HintCanvasGroup: {fileID: 1808297550}
   PointingGameObject: {fileID: 890554897}
   PointingImgGameObject: {fileID: 1258521240}
+--- !u!114 &5599015246712542168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976723090585242557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a89d410d44b7e9143b4b98531f963cd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3976723090772542316
 GameObject:
   m_ObjectHideFlags: 0

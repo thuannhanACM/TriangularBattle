@@ -184,6 +184,8 @@ namespace TriangularBattle
                         {
                             Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
                             selectingPoint=hitPoint;
+                            foreach(var p in selectingPoint.connectablePoints)
+                                p.ToggleHilight(true);
 
                             SelectingLineRenderers[side].SetPosition(0, hitPoint.transform.position);
                             SelectingLineRenderers[side].SetPosition(1, hitPoint.transform.position);
@@ -202,7 +204,11 @@ namespace TriangularBattle
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     if(Physics.Raycast(ray, out hit))
                     {
-                        UpdateSelection(side, hit.point);
+                        Point p = hit.transform.GetComponent<Point>();
+                        if(p!=null&&selectingPoint.connectablePoints.Contains(p))
+                            UpdateSelection(side, p.Pos);
+                        else
+                            UpdateSelection(side, hit.point);
                     }
                     return true;
                 }
@@ -226,6 +232,11 @@ namespace TriangularBattle
                                 lastSelectedPoint=p;
                             }
                         }
+                    }
+                    if(selectingPoint!=null)
+                    {
+                        foreach(var p in selectingPoint.connectablePoints)
+                            p.ToggleHilight(false);
                     }
                     selectingPoint=null;
                     return true;
