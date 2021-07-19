@@ -13,6 +13,9 @@ namespace TriangularBattle
         [SerializeField]
         private GameObject hilight;
 
+        private List<Point> availableRelativePoints;
+        public Point[] AvailableRelativePoints { get { return availableRelativePoints.ToArray(); } }
+
         public Dictionary<string, Line> relativeLines = new Dictionary<string, Line>();
         public Dictionary<string, Triangle> relativeTriangles = new Dictionary<string, Triangle>();
 
@@ -23,7 +26,7 @@ namespace TriangularBattle
         // Start is called before the first frame update
         void Start()
         {
-
+            availableRelativePoints=new List<Point>(connectablePoints);
         }
 
         // Update is called once per frame
@@ -32,10 +35,29 @@ namespace TriangularBattle
 
         }
 
-        public void AddLine(Line line)
+        public void AddLine(Level level, Line line)
         {
             if(!relativeLines.ContainsKey(line.Id))
                 relativeLines.Add(line.Id, line);
+            
+            if(line.StartPoint==this)
+                availableRelativePoints.Remove(line.EndPoint);
+            else if(line.EndPoint=this)
+                availableRelativePoints.Remove(line.StartPoint);
+
+            List<Point> shouldRemovePoints = new List<Point>();
+            foreach(var p in availableRelativePoints)
+            {
+                if(!level.IsLineAvailable(this, p))
+                {
+                    shouldRemovePoints.Add(p);
+                }
+            }
+
+            foreach(var removeP in shouldRemovePoints)
+            {
+                availableRelativePoints.Remove(removeP);
+            }
         }
 
         public void AddTriangle(Triangle triangle)
@@ -53,6 +75,20 @@ namespace TriangularBattle
                     result.Add(line.Value);
             }
             return result;
+        }
+
+        public void ToggleHilightOnRelativePoints(bool isHilight)
+        {
+            if(isHilight)
+            {
+                foreach(var p in AvailableRelativePoints)
+                    p.ToggleHilight(true);
+            }
+            else
+            {
+                foreach(var p in connectablePoints)
+                    p.ToggleHilight(false);
+            }
         }
 
         public void ToggleHilight(bool isHilight)

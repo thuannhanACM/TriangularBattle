@@ -17,8 +17,15 @@ namespace TriangularBattle
         public Transform Anchor_BottomLeft;
         [SerializeField]
         public Transform Anchor_TopRight;
+        [SerializeField]
+        public LineRenderer[] SelectingLineRenderers;
+        [SerializeField]
+        public int numArmyPerLine = 3;
+        [SerializeField]
+        public float armyScale = 2.0f;
 
-        public Point[] Points { get { return serializedPoints; } }
+        private List<Point> availablePoints = new List<Point>();
+        public Point[] Points { get { return availablePoints.ToArray(); } }
 
         private Dictionary<string, Line> connectingLines = new Dictionary<string, Line>();
         private Dictionary<string, Triangle> connectingTriangles = new Dictionary<string, Triangle>();
@@ -26,7 +33,7 @@ namespace TriangularBattle
         // Start is called before the first frame update
         void Start()
         {
-
+            availablePoints=new List<Point>(serializedPoints);
         }
 
         // Update is called once per frame
@@ -61,7 +68,7 @@ namespace TriangularBattle
             return isvalidLine;
         }
 
-        public Line AddLine(int side, Point pA, Point pB)
+        public Line AddLine(int side, Point pA, Point pB, bool isTriggerByTriangle = false)
         {
             if(lineTemplate==null)
                 lineTemplate=Resources.Load<Line>("Line");
@@ -82,9 +89,17 @@ namespace TriangularBattle
                 line.SetPoints(pA, pB);
                 Global.VibrationHaptic(1);
                 line.Side=side;
-                line.AddCharacter(side);
-                pA.AddLine(line);
-                pB.AddLine(line);
+                if(isTriggerByTriangle)
+                    StartCoroutine(line.AddCharacter(side, numArmyPerLine, armyScale, 0.05f));
+                pA.AddLine(this, line);
+                pB.AddLine(this, line);
+
+                if(GetAvailableLinesNum(pA)==0)
+                    availablePoints.Remove(pA);
+
+                if(GetAvailableLinesNum(pB)==0)
+                    availablePoints.Remove(pB);
+
                 return line;
             }
             else
@@ -115,7 +130,7 @@ namespace TriangularBattle
                                 if(newLine==null)
                                 {
                                     //create new line
-                                    newLine=AddLine(side, targetPoint_i, targetPoint_j);
+                                    newLine=AddLine(side, targetPoint_i, targetPoint_j, true);
                                 }
                                 else
                                 {
@@ -124,7 +139,7 @@ namespace TriangularBattle
                                         if(newLine.relativeTriangles.Count>0)
                                             continue;
                                         else
-                                            newLine.SwitchSide();
+                                            newLine.SwitchSide(numArmyPerLine, armyScale);
                                     }
                                 }
                                 if(newLine!=null)
@@ -169,7 +184,7 @@ namespace TriangularBattle
         {
             foreach(var p in serializedPoints)
             {
-                foreach(var relativePoint in p.connectablePoints)
+                foreach(var relativePoint in p.AvailableRelativePoints)
                 {
                     if(IsLineAvailable(p, relativePoint))
                         return false;
@@ -187,6 +202,11 @@ namespace TriangularBattle
                     numLines++;
             }
             return numLines;
+        }
+
+        public int GetAvailableLinesNum(Point point)
+        {
+            return point.AvailableRelativePoints.Length;
         }
     }
 }

@@ -16,8 +16,9 @@ namespace TriangularBattle
 
         private void Start()
         {
-            if(!Application.isEditor)
-                DebugBtn.SetActive(false); //hide DEBUG btn on device
+        #if !UNITY_EDITOR
+            DebugBtn.SetActive(false); //hide DEBUG btn on device
+        #endif
             CurrentLevel=Data.CurrentLevel;
         }
 

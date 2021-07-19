@@ -116,7 +116,7 @@ namespace TriangularBattle
         public void ShowPlayerTurnAnimation()
         {
             playerTurnAnimObject.SetActive(true);
-            Invoke("FinishPlayerTurnAnimation", 2f);
+            Invoke("FinishPlayerTurnAnimation", 1.5f);
         }
 
         public void FinishPlayerTurnAnimation()

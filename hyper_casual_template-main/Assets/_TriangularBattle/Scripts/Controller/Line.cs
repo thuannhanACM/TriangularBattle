@@ -41,6 +41,12 @@ namespace TriangularBattle
             UpdateLine();
         }
 
+        public void SetPositions(Vector3 posA, Vector3 posB)
+        {
+            lineRenderer.SetPosition(0, posA);
+            lineRenderer.SetPosition(1, posB);
+        }
+
         public void AddTriangle(Triangle triangle)
         {
             if(!relativeTriangles.ContainsKey(triangle.Id))
@@ -56,30 +62,34 @@ namespace TriangularBattle
             lineRenderer.alignment=LineAlignment.TransformZ;
         }
 
-        public void AddCharacter(int side)
+
+        public IEnumerator AddCharacter(int side, int numArmy, float armyScale, float delay)
         {
             Vector3 lineVector = EndPoint.Pos-StartPoint.Pos;
             float Length = lineVector.magnitude;
-
-            for(int i = 0; i<3; i++)
+            for(int i = 0; i<numArmy; i++)
             {
+                Vector3 pos = StartPoint.Pos+lineVector.normalized*((1+i)*Length/(numArmy+1));
+                //play dust particles
+                GameObject fx = Instantiate<GameObject>(GameManager.instance.KickOutExplosion);
+                fx.transform.position=pos;
+                Destroy(fx, 3.05f);
+                yield return new WaitForEndOfFrame();
+
                 AnimatingCharacter newChar = Instantiate<AnimatingCharacter>(GameManager.instance.soldierPrefab[side]);
                 newChar.transform.parent=transform;
-                newChar.transform.localScale=Vector3.one*1.25f;
-                newChar.transform.position=StartPoint.Pos+lineVector.normalized*((1+i)*Length/4);
+                newChar.transform.localScale=Vector3.one*armyScale;
+                newChar.transform.position=pos;
                 newChar.transform.eulerAngles=Vector3.zero;
 
                 characters.Add(newChar);
+                yield return new WaitForSeconds(delay);
             }
         }
 
-        public void SwitchSide()
+        public void SwitchSide(int numArmy, float armyScale)
         {
             Side=(Side+1)%2;
-            //play dust particles
-            GameObject fx = Instantiate<GameObject>(GameManager.instance.KickOutExplosion);
-            fx.transform.position=MiddleOfLine;
-            Destroy(fx, 3.05f);
 
             Global.VibrationHaptic(4);
 
@@ -91,7 +101,7 @@ namespace TriangularBattle
             characters.Clear();
 
             //then re add new Characters
-            AddCharacter(Side);
+            StartCoroutine(AddCharacter(Side, numArmy, armyScale,0.05f));
         }
 
         public static bool AreLinesIntersect(Point p1, Point p2, Line line)
