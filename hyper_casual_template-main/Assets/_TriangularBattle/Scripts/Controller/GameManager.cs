@@ -206,74 +206,67 @@ namespace TriangularBattle
 
         private bool UpdateMouseInput(int side)
         {
-            if(selectingPoint==null)
+            if(Input.GetMouseButton(0))
             {
-                if(Input.GetMouseButtonDown(0))
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if(Physics.Raycast(ray, out hit))
                 {
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
-                    if(Physics.Raycast(ray, out hit))
+                    Point p = hit.transform.GetComponent<Point>();
+                    if(p!=null)
                     {
-                        if(hit.collider.gameObject.GetComponent<Point>()!=null)
+                        if(selectingPoint==null)
                         {
-                            Point hitPoint = hit.collider.gameObject.GetComponent<Point>();
-                            selectingPoint=hitPoint;
+                            selectingPoint=p;
                             selectingPoint.ToggleHilightOnRelativePoints(true);
 
-                            GetLineRenderer(side).SetPosition(0, hitPoint.transform.position);
-                            GetLineRenderer(side).SetPosition(1, hitPoint.transform.position);
+                            GetLineRenderer(side).SetPosition(0, p.Pos);
+                            GetLineRenderer(side).SetPosition(1, p.Pos);
                             GetLineRenderer(side).gameObject.SetActive(true);
-
-                            return true;
                         }
-                    }
-                }
-            }
-            else
-            {
-                if(Input.GetMouseButton(0))
-                {
-                    RaycastHit hit;
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    if(Physics.Raycast(ray, out hit))
-                    {
-                        Point p = hit.transform.GetComponent<Point>();
-                        if(p!=null&&selectingPoint.AvailableRelativePoints.Contains(p))
-                            UpdateSelection(side, p.Pos);
                         else
-                            UpdateSelection(side, hit.point);// new Vector3(hit.point.x, 0.1f, hit.point.z));
-                    }
-                    return true;
-                }
-                else if(Input.GetMouseButtonUp(0))
-                {
-                    GetLineRenderer(side).gameObject.SetActive(false);
-                    RaycastHit hit;
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    if(Physics.Raycast(ray, out hit))
-                    {
-                        Point p = hit.collider.gameObject.GetComponent<Point>();
-                        if(p!=null&&selectingPoint.AvailableRelativePoints.Contains(p))
                         {
-                            var line = currentLevel.AddLine(side, selectingPoint, p);
-                            if(line!=null)
-                            {
-                                animatingLine=line;
-                                animatingLine_StartPos=selectingPoint.Pos;
-                                fakeDraggingPos.position=selectingPoint.Pos;
-                                lastSelectedPoint=p;
-                                StartCoroutine(animatingLine.AddCharacter(PLAYER_SIDE, currentLevel.numArmyPerLine, currentLevel.armyScale, 0.15f));
-                                SwitchState(GameState.player_input_animation);
-                            }
+                            if(p!=null&&selectingPoint.AvailableRelativePoints.Contains(p))
+                                UpdateSelection(side, p.Pos);
+                            else
+                                UpdateSelection(side, hit.point);// new Vector3(hit.point.x, 0.1f, hit.point.z));
                         }
                     }
-
-                    if(selectingPoint!=null)
-                        selectingPoint.ToggleHilightOnRelativePoints(false);
-
-                    selectingPoint=null;
-                    return true;
+                    else if(selectingPoint!=null)
+                    {
+                        UpdateSelection(side, hit.point);// new Vector3(hit.point.x, 0.1f, hit.point.z));
+                    }
                 }
+                return true;
+            }
+            else if(Input.GetMouseButtonUp(0))
+            {
+                GetLineRenderer(side).gameObject.SetActive(false);
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if(Physics.Raycast(ray, out hit))
+                {
+                    Point p = hit.collider.gameObject.GetComponent<Point>();
+                    if(p!=null&&selectingPoint.AvailableRelativePoints.Contains(p))
+                    {
+                        var line = currentLevel.AddLine(side, selectingPoint, p);
+                        if(line!=null)
+                        {
+                            animatingLine=line;
+                            animatingLine_StartPos=selectingPoint.Pos;
+                            fakeDraggingPos.position=selectingPoint.Pos;
+                            lastSelectedPoint=p;
+                            StartCoroutine(animatingLine.AddCharacter(PLAYER_SIDE, currentLevel.numArmyPerLine, currentLevel.armyScale, 0.15f));
+                            SwitchState(GameState.player_input_animation);
+                        }
+                    }
+                }
+
+                if(selectingPoint!=null)
+                    selectingPoint.ToggleHilightOnRelativePoints(false);
+
+                selectingPoint=null;
+                return true;
             }
             return false;
         }
@@ -345,7 +338,7 @@ namespace TriangularBattle
         private void MakeEnemyLine()
         {
             GetLineRenderer(ENEMY_SIDE).gameObject.SetActive(false);
-            var line = currentLevel.AddLine(ENEMY_SIDE, selectingPoint, lastSelectedPoint);
+            var line = currentLevel.AddLine(ENEMY_SIDE, lastSelectedPoint, selectingPoint);
             if(line!=null)
             {
                 animatingLine=line;
@@ -402,7 +395,7 @@ namespace TriangularBattle
 
         private void OnPlayerInputAnimatingDone()
         {
-            animatingLine.SetPositions(animatingLine_StartPos, fakeDraggingPos.position);
+            animatingLine.SetPositions(animatingLine.StartPoint.Pos, animatingLine.EndPoint.Pos);
             currentLevel.CreateTriangles(PLAYER_SIDE, animatingLine.StartPoint);
             currentLevel.CreateTriangles(PLAYER_SIDE, animatingLine.EndPoint);
             UpdateScore(currentLevel.GetScore(PLAYER_SIDE), currentLevel.GetScore(ENEMY_SIDE));
@@ -412,7 +405,7 @@ namespace TriangularBattle
 
         private void OnEnemyInputAnimatingDone()
         {
-            animatingLine.SetPositions(animatingLine_StartPos, fakeDraggingPos.position);
+            animatingLine.SetPositions(animatingLine.StartPoint.Pos, animatingLine.EndPoint.Pos);
             currentLevel.CreateTriangles(ENEMY_SIDE, animatingLine.StartPoint);
             currentLevel.CreateTriangles(ENEMY_SIDE, animatingLine.EndPoint);
             UpdateScore(currentLevel.GetScore(PLAYER_SIDE), currentLevel.GetScore(ENEMY_SIDE));
